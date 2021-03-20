@@ -16,10 +16,10 @@ enum State {
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var textField1: UITextField!
-    @IBOutlet weak var textField2: UITextField!
-    @IBOutlet weak var segmentController: UISegmentedControl!
-    @IBOutlet weak var textLabel: UILabel!
+    @IBOutlet private weak var textField1: UITextField!
+    @IBOutlet private weak var textField2: UITextField!
+    @IBOutlet private weak var segmentController: UISegmentedControl!
+    @IBOutlet private weak var textLabel: UILabel!
 
     private var state: State = .add
 
@@ -34,6 +34,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func didTapButton(_ sender: Any) {
+
         switch state {
 
         case .add:

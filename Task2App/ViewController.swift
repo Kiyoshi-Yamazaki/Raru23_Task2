@@ -7,11 +7,36 @@
 
 import UIKit
 
-enum State {
+enum CalculationResult {
+    case valid(Double)
+    case invalid(String)
+}
+
+enum Calculator {
     case add
     case sub
     case mul
     case div
+
+    init?(selectedIndex: Int) {
+        let results: [Calculator] = [.add, .sub, .mul, .div]
+        guard results.indices.contains(selectedIndex) else { return nil }
+        self = results[selectedIndex]
+    }
+
+    func calculate(num1: Double, num2: Double) -> CalculationResult {
+        switch self {
+        case .add:
+            return .valid(num1 + num2)
+        case .sub:
+            return .valid(num1 - num2)
+        case .mul:
+            return .valid(num1 * num2)
+        case .div:
+            guard num2 != 0 else { return .invalid("割る数には0以外を入力してください") }
+            return .valid(num1 / num2)
+        }
+    }
 }
 
 class ViewController: UIViewController {
@@ -21,7 +46,7 @@ class ViewController: UIViewController {
     @IBOutlet private weak var segmentController: UISegmentedControl!
     @IBOutlet private weak var textLabel: UILabel!
 
-    private var state: State = .add
+    private var calculator: Calculator = .add
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,59 +54,23 @@ class ViewController: UIViewController {
         textField2.keyboardType = .numberPad
     }
 
-    func culculate(num1: Double, num2: Double, culculate: (Double, Double) -> (Double)) -> Double {
-        culculate(num1, num2)
-    }
-
     @IBAction func didTapButton(_ sender: Any) {
 
-        switch state {
-
-        case .add:
-            textLabel.text = String(culculate(num1: Double(textField1.text ?? "") ?? 0,
-                                              num2: Double(textField2.text ?? "") ?? 0,
-                                              culculate: +)
-            )
-        case .sub:
-            textLabel.text = String(culculate(num1: Double(textField1.text ?? "") ?? 0,
-                                              num2: Double(textField2.text ?? "") ?? 0,
-                                              culculate: -)
-            )
-        case .mul:
-            textLabel.text = String(culculate(num1: Double(textField1.text ?? "") ?? 0,
-                                              num2: Double(textField2.text ?? "") ?? 0,
-                                              culculate: *)
-            )
-        case .div:
-
-            if textField2.text == String(0) {
-                textLabel.text = "割る数には0以外を入力してください"
-                return
-            }
-            textLabel.text = String(culculate(num1: Double(textField1.text ?? "") ?? 0,
-                                              num2: Double(textField2.text ?? "") ?? 0,
-                                              culculate: /)
-            )
-
+        let num1 = Double(textField1.text ?? "") ?? 0
+        let num2 = Double(textField2.text ?? "") ?? 0
+        switch calculator.calculate(num1: num1, num2: num2) {
+        case let .valid(result):
+            textLabel.text = String(result)
+        case let .invalid(message):
+            textLabel.text = message
         }
-
     }
 
     @IBAction func didSelectedButton(_ sender: UISegmentedControl) {
-
-        switch sender.selectedSegmentIndex {
-
-        case 0:
-            state = .add
-        case 1:
-            state = .sub
-        case 2:
-            state = .mul
-        case 3:
-            state = .div
-        default:
-            break
+        guard let calculator = Calculator(selectedIndex: sender.selectedSegmentIndex) else {
+            fatalError("Invalid selectedSegmentIndex.")
         }
+        self.calculator = calculator
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
